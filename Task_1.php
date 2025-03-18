@@ -3,73 +3,102 @@
 <body>
 
 <?php
-$mark = [];
-$avg = null;
+$no_stud = $error = null;
+$marks = [];
+$averages = [];
 
-if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    if (
-        empty($_POST['tam']) || empty($_POST['eng']) || empty($_POST['math']) || 
-        empty($_POST['sci']) || empty($_POST['soc'])
-    ) {
-        echo "<div style='color:red;'>One or more fields are empty!</div>";
-    } elseif (
-        !is_numeric($_POST['tam']) || $_POST['tam'] < 0 || $_POST['tam'] > 100 ||
-        !is_numeric($_POST['eng']) || $_POST['eng'] < 0 || $_POST['eng'] > 100 ||
-        !is_numeric($_POST['math']) || $_POST['math'] < 0 || $_POST['math'] > 100 ||
-        !is_numeric($_POST['sci']) || $_POST['sci'] < 0 || $_POST['sci'] > 100 ||
-        !is_numeric($_POST['soc']) || $_POST['soc'] < 0 || $_POST['soc'] > 100
-    ) {
-        echo "<div style='color:red;'>Enter valid marks (0-100) only!</div>";
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['nxt'])) {
+    if (empty($_POST['no_stud'])) {
+        echo "<div style='color:red;'>Please enter the number of students!</div>";
+    } elseif (!is_numeric($_POST['no_stud']) || $_POST['no_stud'] < 1) {
+        echo "<div style='color:red;'>Enter a valid positive number!</div>";
     } else {
-        $mark = [
-            $_POST['tam'],
-            $_POST['eng'],
-            $_POST['math'],
-            $_POST['sci'],
-            $_POST['soc']
+        $no_stud = (int)$_POST['no_stud'];
+    }
+}
+
+// Handle marks submission
+if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['Submit'])) {
+    $no_stud = $_POST['student_count'] ?? 0;
+    
+    for ($i = 0; $i < $no_stud; $i++) {
+        $marks[$i] = [
+            'tam'  => $_POST["tam"][$i] ?? '',
+            'eng'  => $_POST["eng"][$i] ?? '',
+            'math' => $_POST["math"][$i] ?? '',
+            'sci'  => $_POST["sci"][$i] ?? '',
+            'soc'  => $_POST["soc"][$i] ?? ''
         ];
 
-        $avg = calc($mark);
+        // Validate marks
+        foreach ($marks[$i] as $subject => $score) {
+            if (!is_numeric($score) || $score < 0 || $score > 100) {
+                echo "<div style='color:red;'>Invalid input in Student " . ($i + 1) . " ($subject)!</div>";
+                $marks[$i][$subject] = '';
+            }
+        }
+
+        // If all marks are valid, calculate the average
+        if (!in_array('', $marks[$i], true)) {
+            $averages[$i] = calc($marks[$i]);
+        }
     }
 }
 
 // Function to Calculate Average
 function calc($mark) {
     $total = array_sum($mark);
-    $avg = $total / count($mark);
-    echo "<div>Average Marks: " . number_format($avg, 2) . "</div>";
-    return $avg;
+    return round($total / count($mark), 2);
 }
 ?>
 
-<form action="<?php echo $_SERVER['PHP_SELF']?>" method="post">
-    <h1>Enter 5 Subjects Marks</h1>
-    Tamil: <input type="text" name="tam" value="<?php echo $_POST['tam'] ?? ""; ?>"> <br>
-    English: <input type="text" name="eng" value="<?php echo $_POST['eng'] ?? ""; ?>"> <br>
-    Maths: <input type="text" name="math" value="<?php echo $_POST['math'] ?? ""; ?>"> <br>
-    Science: <input type="text" name="sci" value="<?php echo $_POST['sci'] ?? ""; ?>"> <br>
-    Social: <input type="text" name="soc" value="<?php echo $_POST['soc'] ?? ""; ?>"> <br>
-    <input type="submit" value="Submit">
+<!-- Form to Get Number of Students -->
+<form action="" method="post">
+    <h3>Enter Number of Students</h3>
+    <input type="text" name="no_stud" value="<?php echo htmlspecialchars($no_stud); ?>">
+    <input type="submit" name="nxt" value="Next">
 </form>
 
+<?php if ($no_stud): ?>
+    <!-- Form to Enter Marks for Each Student -->
+    <form action="" method="post">
+        <input type="hidden" name="student_count" value="<?php echo $no_stud; ?>">
+        <h3>Enter Marks for <?php echo $no_stud; ?> Students</h3>
+        
+        <?php for ($i = 0; $i < $no_stud; $i++): ?>
+            <h4>Student <?php echo $i + 1; ?></h4>
+            Tamil: <input type="text" name="tam[]" value="<?php echo $_POST["tam"][$i] ?? ""; ?>"> <br>
+            English: <input type="text" name="eng[]" value="<?php echo $_POST["eng"][$i] ?? ""; ?>"> <br>
+            Maths: <input type="text" name="math[]" value="<?php echo $_POST["math"][$i] ?? ""; ?>"> <br>
+            Science: <input type="text" name="sci[]" value="<?php echo $_POST["sci"][$i] ?? ""; ?>"> <br>
+            Social: <input type="text" name="soc[]" value="<?php echo $_POST["soc"][$i] ?? ""; ?>"> <br><br>
+        <?php endfor; ?>
+        
+        <input type="submit" name="Submit" value="Submit">
+    </form>
+<?php endif; ?>
+
 <?php
-// Display Grade if Average is Calculated
-if ($avg !== null) {
-    echo "<br><b>Grade: ";
-    if ($avg >= 90) {
-        echo "A+";
-    } elseif ($avg >= 80) {
-        echo "A";
-    } elseif ($avg >= 70) {
-        echo "B+";
-    } elseif ($avg >= 60) {
-        echo "B";
-    } else {
-        echo "Fail";
+// Display Grades if Averages Are Calculated
+if (!empty($averages)) {
+    echo "<h3>Results:</h3>";
+    foreach ($averages as $index => $avg) {
+        echo "<b>Student " . ($index + 1) . " - Average Marks: $avg | Grade: ";
+
+        if ($avg >= 90) {
+            echo "A+";
+        } elseif ($avg >= 80) {
+            echo "A";
+        } elseif ($avg >= 70) {
+            echo "B+";
+        } elseif ($avg >= 60) {
+            echo "B";
+        } else {
+            echo "Fail";
+        }
+        echo "</b><br>";
     }
-    echo "</b>";
 }
 ?>
-
 </body>
 </html>
