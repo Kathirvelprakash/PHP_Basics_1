@@ -7,7 +7,6 @@ $no_stud = $error = null;
 $marks = [];
 $averages = [];
 
-// If "Next" is clicked, store student count
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['nxt'])) {
     if (empty($_POST['no_stud'])) {
         $error = "<div style='color:red;'>Please enter the number of students!</div>";
@@ -19,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['nxt'])) {
     }
 }
 
-// If "Submit" is clicked, store student marks
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['Submit'])) {
     $no_stud = $_POST['student_count'] ?? 0;
     
@@ -31,8 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['Submit'])) {
             'sci'  => $_POST["sci"][$i] ?? '',
             'soc'  => $_POST["soc"][$i] ?? ''
         ];
-        
-        // Validate marks
+
         foreach ($marks[$i] as $subject => $score) {
             if (!is_numeric($score) || $score < 0 || $score > 100) {
                 echo "<div style='color:red;'>Invalid input in Student " . ($i + 1) . " ($subject)!</div>";
@@ -40,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['Submit'])) {
             }
         }
 
-        // If all marks are valid, calculate the average
+
         if (!in_array('', $marks[$i], true)) {
             $averages[$i] = calc($marks[$i]);
         }
