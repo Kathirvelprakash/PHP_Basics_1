@@ -79,7 +79,7 @@ function calc($mark) {
 <?php endif; ?>
 
 <?php if (isset($_POST['Submit'])): ?>
-<!-- Step 3: Display Results -->
+
 <h3>Results:</h3>
 <?php
 if (!empty($averages)) {
