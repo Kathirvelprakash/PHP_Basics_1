@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['Submit'])) {
     }
 }
 
-// Function to Calculate Average
 function calc($mark) {
     $total = array_sum($mark);
     return round($total / count($mark), 2);
@@ -52,8 +51,8 @@ function calc($mark) {
 ?>
 
 <?php if (!isset($_POST['nxt']) && !isset($_POST['Submit'])): ?>
-<!-- Step 1: Enter Number of Students -->
-<form action="" method="post">
+
+    <form action="" method="post">
     <h3>Enter Number of Students</h3>
     <input type="text" name="no_stud" value="<?php echo htmlspecialchars($no_stud); ?>">
     <input type="submit" name="nxt" value="Next">
@@ -61,7 +60,7 @@ function calc($mark) {
 <?php endif; ?>
 
 <?php if (isset($_POST['nxt']) && empty($_POST['Submit'])): ?>
-<!-- Step 2: Enter Marks for Each Student -->
+
 <form action="" method="post">
     <input type="hidden" name="student_count" value="<?php echo $no_stud; ?>">
     <h3>Enter Marks for <?php echo $no_stud; ?> Students</h3>
